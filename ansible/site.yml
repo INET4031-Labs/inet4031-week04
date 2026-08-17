@@ -1,0 +1,17 @@
+---
+# ASSUMPTION: This file accumulates plays across weeks 1-4, each adding that week's tool.
+# By Week 4, site.yml should contain plays for: docker-setup (Week 1), k3d-setup (Week 3),
+# and opentofu-setup (Week 4).
+#
+# When constructing your full site.yml, preserve the plays from prior weeks and add the
+# opentofu-setup play below. Do NOT rewrite the entire file each week.
+
+# TODO: Ensure plays from Week 1 (docker-setup) and Week 3 (k3d-setup) are preserved above this play.
+
+- name: Install and initialize OpenTofu
+  hosts: localhost
+  connection: local
+  become: yes
+
+  roles:
+    - opentofu-setup

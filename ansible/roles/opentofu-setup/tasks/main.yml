@@ -1,0 +1,38 @@
+---
+- name: Check if OpenTofu is installed
+  command: which tofu
+  register: tofu_check
+  failed_when: false
+  changed_when: false
+
+- name: Download and install OpenTofu
+  block:
+    - name: Download OpenTofu tarball
+      get_url:
+        url: https://github.com/opentofu/opentofu/releases/download/v1.8.0/tofu_1.8.0_linux_amd64.tar.gz
+        dest: /tmp/tofu.tar.gz
+        mode: '0644'
+
+    - name: Extract OpenTofu binary
+      unarchive:
+        src: /tmp/tofu.tar.gz
+        dest: /usr/local/bin
+        remote_src: yes
+        extra_opts: ['--wildcards', 'tofu']
+
+    - name: Ensure tofu is executable
+      file:
+        path: /usr/local/bin/tofu
+        mode: '0755'
+
+    - name: Remove tarball
+      file:
+        path: /tmp/tofu.tar.gz
+        state: absent
+  when: tofu_check.rc != 0
+
+- name: Initialize OpenTofu working directory
+  command: tofu init
+  args:
+    chdir: "{{ playbook_dir }}/../infrastructure"
+  changed_when: false
