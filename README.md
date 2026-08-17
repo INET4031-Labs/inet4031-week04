@@ -25,6 +25,32 @@ In this lab, you will manage your Kubernetes infrastructure declaratively using 
 - Week 3 complete: k3d cluster running with application manifests deployed
 - `kubectl` is configured and cluster is reachable
 
+## Pulling This Week's Starter Content Into Your Team Repo
+
+This repo (`inet4031-week04`) is instructor-provided starter/reference content for
+Week 4, not something you clone standalone. Pull the pieces you need into your
+team's single repo:
+
+```bash
+git remote add week4 https://github.com/INET4031-Labs/inet4031-week04.git
+git fetch week4
+git checkout week4/main -- infrastructure ansible/roles scripts docs
+git remote remove week4
+```
+
+**`ansible/site.yml` needs manual merging, not a direct checkout.** This week's copy
+is a single new play, not the full accumulated file -- checking it out directly would
+delete Week 1's and Week 3's plays. Pull it to a scratch file and merge by hand:
+
+```bash
+git show week4/main:ansible/site.yml > ansible/site.yml.week4-addition
+git remote remove week4
+```
+
+Open `ansible/site.yml.week4-addition`, copy the `opentofu-setup` play into your
+existing `ansible/site.yml` below the Week 1 and Week 3 plays, then delete the scratch
+file.
+
 ## OpenTofu Rules
 
 Throughout this lab, apply these rules:
