@@ -59,7 +59,7 @@ Throughout this lab, apply these rules:
 - `ansible/site.yml` - Updated with opentofu-setup play
 - `ansible/roles/opentofu-setup/tasks/main.yml` - Ansible role for OpenTofu installation
 - `scripts/check-week4.sh` - Validation checks
-- `docs/` - Role-specific documentation artifacts (sprint retrospective, environment log, acceptance criteria, QA report)
+- `docs/` - Role-specific documentation artifacts (sprint retrospective, QA report)
 
 ## Role-Specific Responsibilities
 
@@ -67,7 +67,7 @@ This lab is structured so that all four team roles contribute:
 
 - **Scrum Master:** Manages sprint board and team communication; writes sprint retrospective
 - **System Admin:** Verifies environment health; documents infrastructure decisions in environment log
-- **QA:** Writes acceptance criteria before implementation; validates deliverables and runs check script
+- **QA:** Validates deliverables, confirms `tofu plan` is idempotent, and runs check script
 - **Developer(s):** Implements OpenTofu configuration and Ansible playbook updates
 
 ## Key Validation Points
