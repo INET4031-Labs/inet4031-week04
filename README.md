@@ -34,22 +34,15 @@ team's single repo:
 ```bash
 git remote add week4 https://github.com/INET4031-Labs/inet4031-week04.git
 git fetch week4
-git checkout week4/main -- infrastructure ansible/roles scripts docs
+git checkout week4/main -- scripts docs
 git remote remove week4
 ```
 
-**`ansible/site.yml` needs manual merging, not a direct checkout.** This week's copy
-is a single new play, not the full accumulated file -- checking it out directly would
-delete Week 1's and Week 3's plays. Pull it to a scratch file and merge by hand:
-
-```bash
-git show week4/main:ansible/site.yml > ansible/site.yml.week4-addition
-git remote remove week4
-```
-
-Open `ansible/site.yml.week4-addition`, copy the `opentofu-setup` play into your
-existing `ansible/site.yml` below the Week 1 and Week 3 plays, then delete the scratch
-file.
+**`infrastructure/main.tf`, `infrastructure/flask.tf`, and the `opentofu-setup`
+Ansible role are not shipped as files in this repo.** You write them yourself this
+week, following the wiki step by step. Writing the OpenTofu configuration and adding
+the new Ansible play (below Week 1's and Week 3's existing plays, never replacing them)
+is the actual exercise for this lab.
 
 ## OpenTofu Rules
 
