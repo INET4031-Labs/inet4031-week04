@@ -1,27 +1,33 @@
 # Sprint 2 Retrospective
 
-**Scrum Master:** [Name]  
-**Sprint Duration:** Weeks 3-4  
-**Date:** [Completion Date]
+**Owned by:** Scrum Master
+
+This file is completed at the end of the async week (Week 4). Review what your team shipped, what went well, what went poorly, and one specific process change for Sprint 2.
 
 ## What Went Well
 
-[Write here: Accomplishments, smooth processes, effective collaboration]
+TODO: What did your team do well this sprint? What accomplishment are you proud of?
 
-## What Could Be Improved
+## What Could Be Better
 
-[Write here: Blockers, communication gaps, process inefficiencies]
+TODO: What was difficult? What slowed you down? What surprised you?
 
-## Process Change for Sprint 3
+## What We'll Do Differently Next Sprint
 
-[Write here: One concrete change the team will implement in the next sprint]
+TODO: Based on what you learned, name one specific process change or workflow improvement you will try in Sprint 2.
 
-## Sprint Statistics
+## Team Contributions
 
-- **Tasks Completed:** 
-- **Blockers Encountered:** 
-- **Major Decisions Made:** 
+Use this section to note which team members led which parts of the work:
+
+| Role | Name | Primary Contribution |
+|---|---|---|
+| Scrum Master | | |
+| System Admin | | |
+| QA | | |
+| Developer 1 | | |
+| Developer 2+ | | |
 
 ## Notes
 
-[Any additional context for future reference]
+Any additional context about the sprint that does not fit the structure above.
