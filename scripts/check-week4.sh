@@ -1,112 +1,179 @@
 #!/bin/bash
 
-# Week 4 Validation Check Script
-# This script validates that Week 4 deliverables meet the requirements.
-# Run from the root of your repository: ./scripts/check-week4.sh
+# Week 4 Validation Script
+# This script runs all acceptance checks for Week 4 deliverables
+# Run from the repository root: ./scripts/check-week4.sh
 
-set -e  # Exit on first error
+set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_ROOT="$( dirname "$SCRIPT_DIR" )"
+
+# tofu/kubectl are typically installed to /usr/local/bin; make sure it's on
+# PATH regardless of how this script is invoked (e.g. under sudo, where
+# root's PATH may not include it).
+export PATH="/usr/local/bin:$PATH"
+
+# k3d writes its kubeconfig under the home directory of whichever user ran
+# `k3d cluster create` (your normal user, not root). If this script is run
+# with sudo, point kubectl back at that config instead of root's.
+REAL_USER="${SUDO_USER:-$USER}"
+REAL_HOME="$(getent passwd "$REAL_USER" | cut -d: -f6)"
+if [ -f "$REAL_HOME/.kube/config" ]; then
+    export KUBECONFIG="$REAL_HOME/.kube/config"
+fi
 
 # Color codes for output
-RED='\033[0;31m'
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 YELLOW='\033[1;33m'
-NC='\033[0m'  # No Color
+NC='\033[0m' # No Color
 
-CHECKS_PASSED=0
-CHECKS_FAILED=0
+# Track pass/fail status
+PASS_COUNT=0
+FAIL_COUNT=0
 
-# Helper function to print test results
-print_check() {
-  local name="$1"
-  local status="$2"
-
-  if [ "$status" = "PASS" ]; then
-    echo -e "${GREEN}[PASS]${NC} $name"
-    ((CHECKS_PASSED++))
-  else
-    echo -e "${RED}[FAIL]${NC} $name"
-    ((CHECKS_FAILED++))
-  fi
+# Helper function to print results
+check_pass() {
+    echo -e "${GREEN}[PASS]${NC} $1"
+    PASS_COUNT=$((PASS_COUNT + 1))
 }
 
-# TODO: Update this script with your team's specific requirements.
-# This is a starting template; add additional checks as needed.
+check_fail() {
+    echo -e "${RED}[FAIL]${NC} $1"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+}
 
-echo "=== Week 4 Validation Checks ==="
+check_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+echo "========================================="
+echo "Week 4 Validation Checks"
+echo "========================================="
 echo ""
 
+# =========================================
 # Check 1: OpenTofu Applies Without Error
-echo "Check 1: OpenTofu applies without changes"
-if cd "$REPO_ROOT/infrastructure" && tofu plan 2>&1 | grep -q "No changes"; then
-  print_check "OpenTofu applies idempotently" "PASS"
-else
-  print_check "OpenTofu applies idempotently" "FAIL"
-fi
-cd "$REPO_ROOT"
+# =========================================
+echo "Check 1: OpenTofu Applies Without Error"
+echo "-----------------------------------------"
 
+if command -v tofu &> /dev/null; then
+    check_pass "tofu is installed"
+else
+    check_fail "tofu is not installed"
+fi
+
+if (cd "$REPO_ROOT/infrastructure" && tofu plan 2>&1 | grep -q "No changes"); then
+    check_pass "OpenTofu applies idempotently (tofu plan shows no changes)"
+else
+    check_fail "tofu plan shows pending changes - infrastructure has drifted from HCL"
+fi
+
+# =========================================
 # Check 2: Flask Deployment Has 3 Replicas
+# =========================================
 echo ""
-echo "Check 2: Flask Deployment has 3 replicas"
+echo "Check 2: Flask Deployment Has 3 Replicas"
+echo "-------------------------------------------"
+
 FLASK_REPLICAS=$(kubectl get deployment flask -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "0")
 if [ "$FLASK_REPLICAS" = "3" ]; then
-  print_check "Flask deployment has 3 replicas" "PASS"
+    check_pass "Flask Deployment has 3 replicas"
 else
-  print_check "Flask deployment has 3 replicas (got $FLASK_REPLICAS)" "FAIL"
+    check_fail "Flask Deployment does not have 3 replicas (found: $FLASK_REPLICAS)"
 fi
 
+# =========================================
 # Check 3: infrastructure/main.tf Has Local Backend
+# =========================================
 echo ""
-echo "Check 3: infrastructure/main.tf has local backend"
-if grep -q 'backend "local"' "$REPO_ROOT/infrastructure/main.tf" && \
+echo "Check 3: infrastructure/main.tf Has Local Backend"
+echo "-----------------------------------------------------"
+
+if grep -q 'backend "local"' "$REPO_ROOT/infrastructure/main.tf" 2>/dev/null && \
    grep -A2 'backend "local"' "$REPO_ROOT/infrastructure/main.tf" | grep -q 'terraform.tfstate'; then
-  print_check "infrastructure/main.tf has local backend with correct path" "PASS"
+    check_pass "infrastructure/main.tf has a local backend with the correct path"
 else
-  print_check "infrastructure/main.tf has local backend with correct path" "FAIL"
+    check_fail "infrastructure/main.tf is missing a local backend with path = terraform.tfstate"
 fi
 
-# Check 4: Verify required files exist
+# =========================================
+# Check 4: Required Files Exist
+# =========================================
 echo ""
-echo "Check 4: Required files exist"
-FILES_OK=true
-for file in \
-  "infrastructure/main.tf" \
-  "infrastructure/flask.tf" \
-  "ansible/site.yml" \
-  "ansible/roles/opentofu-setup/tasks/main.yml"; do
-  if [ ! -f "$REPO_ROOT/$file" ]; then
-    echo -e "${RED}[FAIL]${NC} Missing required file: $file"
-    FILES_OK=false
-    ((CHECKS_FAILED++))
-  fi
+echo "Check 4: Required Files Exist"
+echo "--------------------------------"
+
+REQUIRED_FILES=(
+    "infrastructure/main.tf"
+    "infrastructure/flask.tf"
+    "ansible/site.yml"
+    "ansible/roles/opentofu-setup/tasks/main.yml"
+)
+
+for file in "${REQUIRED_FILES[@]}"; do
+    if [ -f "$REPO_ROOT/$file" ]; then
+        check_pass "File exists: $file"
+    else
+        check_fail "File missing: $file"
+    fi
 done
 
-if [ "$FILES_OK" = true ]; then
-  print_check "All required files exist" "PASS"
-fi
-
-# Check 5: Verify state files are gitignored
+# =========================================
+# Check 5: State Files Are Gitignored
+# =========================================
 echo ""
-echo "Check 5: State files are in .gitignore"
-if grep -q "infrastructure/terraform.tfstate" "$REPO_ROOT/.gitignore" 2>/dev/null; then
-  print_check "State files in .gitignore" "PASS"
+echo "Check 5: State Files Are Gitignored"
+echo "--------------------------------------"
+
+if (cd "$REPO_ROOT" && git check-ignore -q infrastructure/terraform.tfstate); then
+    check_pass "infrastructure/terraform.tfstate is gitignored"
 else
-  print_check "State files in .gitignore" "FAIL"
+    check_fail "infrastructure/terraform.tfstate is not gitignored"
 fi
 
+if (cd "$REPO_ROOT" && git check-ignore -q infrastructure/terraform.tfstate.backup); then
+    check_pass "infrastructure/terraform.tfstate.backup is gitignored"
+else
+    check_fail "infrastructure/terraform.tfstate.backup is not gitignored"
+fi
+
+# =========================================
+# Check 6: Ansible opentofu-setup Role
+# =========================================
+echo ""
+echo "Check 6: Ansible opentofu-setup Role"
+echo "----------------------------------------"
+
+if grep -q "opentofu-setup" "$REPO_ROOT/ansible/site.yml" 2>/dev/null; then
+    check_pass "ansible/site.yml includes opentofu-setup role"
+else
+    check_fail "ansible/site.yml does not include opentofu-setup role"
+fi
+
+if grep -q "PATH:" "$REPO_ROOT/ansible/site.yml" 2>/dev/null; then
+    check_pass "ansible/site.yml sets PATH environment for tofu under become"
+else
+    check_warn "ansible/site.yml may be missing the PATH override for tofu under become"
+fi
+
+# =========================================
 # Summary
+# =========================================
 echo ""
-echo "=== Summary ==="
-echo -e "${GREEN}Passed: $CHECKS_PASSED${NC}"
-echo -e "${RED}Failed: $CHECKS_FAILED${NC}"
+echo "========================================="
+echo "Validation Summary"
+echo "========================================="
+echo -e "Passed: ${GREEN}$PASS_COUNT${NC}"
+echo -e "Failed: ${RED}$FAIL_COUNT${NC}"
 echo ""
 
-if [ $CHECKS_FAILED -gt 0 ]; then
-  echo -e "${RED}Some checks failed. Please review the output above.${NC}"
-  exit 1
+if [ "$FAIL_COUNT" -eq 0 ]; then
+    echo -e "${GREEN}Status: ALL CHECKS PASSED${NC}"
+    exit 0
 else
-  echo -e "${GREEN}All checks passed!${NC}"
-  exit 0
+    echo -e "${RED}Status: SOME CHECKS FAILED - Review errors above${NC}"
+    exit 1
 fi
