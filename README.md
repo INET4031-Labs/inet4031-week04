@@ -2,12 +2,6 @@
 
 **Sprint 2 Async | Due before Sprint 2 Review**
 
-## IMPORTANT: Architecture Assumption Notice
-
-This lab depends on the university's container platform permitting `--privileged` mode for Docker containers. This assumption has **not been confirmed** by the professor. If privileged mode is unavailable, the nested Docker and k3d model described in this course fails entirely, and the course falls back to individual student VMs. Do not treat this environment as decided until the professor confirms it.
-
----
-
 ## Overview
 
 In this lab, you will manage your Kubernetes infrastructure declaratively using OpenTofu, the open-source Linux Foundation-governed fork of Terraform. OpenTofu uses HCL, the same configuration language and workflow as Terraform, and maintains full compatibility with the Terraform provider ecosystem. You will write OpenTofu configuration that targets your k3d cluster through the Kubernetes provider, use a local backend to store state inside the team container, and verify that your infrastructure is idempotent and self-consistent. You will also extend the Ansible playbook with OpenTofu installation. After completing this lab, you will have your Kubernetes infrastructure defined as HCL code managed declaratively through OpenTofu.
@@ -47,7 +41,6 @@ is the actual exercise for this lab.
 ## OpenTofu Rules
 
 Throughout this lab, apply these rules:
-- Always say "OpenTofu" -- never "Terraform"
 - The command is `tofu`, not `terraform`
 - Link only to opentofu.org for documentation and downloads
 - Use a local backend explicitly in every configuration file
