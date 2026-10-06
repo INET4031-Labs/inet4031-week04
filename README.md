@@ -2,24 +2,25 @@
 
 **Sprint 2 | Due before Sprint 2 Review**
 
-Same team-container privileged-mode assumption as Week 3 applies here (your k3d cluster access depends on it). See Week 3's README if you haven't confirmed it yet.
-
 ## Overview
 
-In this lab, you manage your Kubernetes infrastructure declaratively using OpenTofu, the open-source Linux Foundation-governed fork of Terraform. You will write OpenTofu configuration that targets your k3d cluster through the Kubernetes provider, use a local backend to store state inside the team container, and verify that your infrastructure is idempotent. You will also extend the Ansible playbook with OpenTofu installation.
+In this lab, you define your Kubernetes infrastructure declaratively using OpenTofu, the open-source Linux Foundation-governed fork of Terraform. You will write OpenTofu configuration that targets your k3d cluster through the Kubernetes provider, configure a local backend to store state on your team's VM, and predict how OpenTofu will behave when that configuration is planned and applied, including whether it is idempotent. You will also extend the Ansible playbook with an OpenTofu setup role.
+
+**How this lab works:** This week you write OpenTofu and Ansible code, but you do not run `tofu init`, `tofu plan`, `tofu apply`, or `ansible-playbook`. OpenTofu is already installed on your team's VM by the instructor. For each step marked **[PREDICT ONLY]**, you record what you expect the command to do in the Prediction Log in your team's Google Doc. The Actual column stays blank until your team rebuilds the full stack on an empty VM for the live demo. The one exception is Part 4, where QA deletes a Flask pod on your live Week 3 cluster and observes the recovery.
 
 ## Learning Objectives
 
-- Install OpenTofu from opentofu.org and initialize a local backend configuration
+- Write an OpenTofu configuration with an explicit local backend
 - Write HCL resources using the Kubernetes provider to manage Deployments and Services
-- Run `tofu plan` to preview changes before applying them
-- Verify that `tofu apply` is idempotent
-- Extend the Ansible playbook with OpenTofu installation
+- Predict the output of `tofu plan` before changes are applied
+- Predict whether `tofu apply` is idempotent
+- Extend the Ansible playbook with an OpenTofu setup role
 
 ## Prerequisites
 
 - Week 3 complete: k3d cluster running with application manifests deployed
 - `kubectl` is configured and cluster is reachable
+- OpenTofu is installed on your team's VM by the instructor (you will not run it this week)
 
 ## Pulling This Week's Starter Content Into Your Team Repo
 
@@ -39,26 +40,36 @@ Ansible role are not shipped as files in this repo.** You write them yourself th
 week, following the wiki. Add the new Ansible play below Week 1's and Week 3's
 existing plays, never replacing them.
 
+This week you also remove the Week 3 Flask Deployment and Service manifests from `manifests/` with `git rm`, because OpenTofu now defines them. Do not run `kubectl delete`. Your live cluster keeps running Flask for later weeks.
+
 ## OpenTofu Rules
 
 - The command is `tofu`, not `terraform`
-- Link only to opentofu.org for documentation and downloads
+- Link only to opentofu.org for documentation
 - Use a local backend explicitly in every configuration file
+- Do not run `tofu init`, `tofu plan`, `tofu apply`, or `ansible-playbook` this week
 
 ## Role Distribution
 
-- **Scrum Master:** manages sprint board and team communication, writes sprint retrospective
-- **System Admin:** verifies environment health, documents infrastructure decisions
-- **QA:** validates deliverables, confirms `tofu plan` is idempotent, runs check script
-- **Developer(s):** implements OpenTofu configuration and Ansible playbook updates
+Use the same Sprint 2 role assignments your team recorded in Week 3. No single team member should complete the entire lab.
+
+- **Scrum Master:** creates the Prediction Log table in the team Google Doc, manages the sprint board and team communication, writes the sprint retrospective, opens the Week 5 tickets, and pairs with the Developers on Part 3
+- **System Admin:** pulls the starter content, leads Part 1 (OpenTofu configuration) and Part 5 (Ansible role and play), and runs the Storage Check
+- **QA:** leads Part 4 (resilience validation), runs all validation checks and the check script, and is the final approver before deliverables are marked Done
+- **Developer(s):** lead Part 2 (`flask.tf` and removing the Week 3 Flask manifests) and Part 3 (replica change and idempotency predictions). With five team members, split the Developer steps between two people
+
+The role that leads a part writes the Prediction Log entries and Google Doc discussion answers for that part, and the whole team reviews them before the part is marked Done.
 
 ## Deliverables
 
 - `infrastructure/main.tf` with explicit local backend and Kubernetes provider
-- `infrastructure/flask.tf` with Deployment and Service resources
-- `.gitignore` updated to exclude state files
+- `infrastructure/flask.tf` with Deployment and Service resources, replicas set to 3
+- Week 3 Flask Deployment and Service manifests removed from `manifests/`
+- `.gitignore` updated to exclude state files and `infrastructure/.terraform/`
 - `ansible/site.yml` updated with opentofu-setup play
 - `ansible/roles/opentofu-setup/tasks/main.yml` committed
+- Prediction Log (P1 to P10) completed in your team's Google Doc, with the Actual column filled in for P8 only
+- Screenshot of the Flask pod cycling back to Running (Part 4)
 - `./scripts/check-week4.sh` passing
 
 ## Full Instructions
