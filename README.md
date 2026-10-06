@@ -22,26 +22,6 @@ In this lab, you define your Kubernetes infrastructure declaratively using OpenT
 - `kubectl` is configured and cluster is reachable
 - OpenTofu is installed on your team's VM by the instructor (you will not run it this week)
 
-## Pulling This Week's Starter Content Into Your Team Repo
-
-This repo (`inet4031-week04`) is instructor-provided starter/reference content for
-Week 4, not something you clone standalone. Pull the pieces you need into your
-team's single repo:
-
-```bash
-git remote add week4 https://github.com/INET4031-Labs/inet4031-week04.git
-git fetch week4
-git checkout week4/main -- scripts docs
-git remote remove week4
-```
-
-**`infrastructure/main.tf`, `infrastructure/flask.tf`, and the `opentofu-setup`
-Ansible role are not shipped as files in this repo.** You write them yourself this
-week, following the wiki. Add the new Ansible play below Week 1's and Week 3's
-existing plays, never replacing them.
-
-This week you also remove the Week 3 Flask Deployment and Service manifests from `manifests/` with `git rm`, because OpenTofu now defines them. Do not run `kubectl delete`. Your live cluster keeps running Flask for later weeks.
-
 ## OpenTofu Rules
 
 - The command is `tofu`, not `terraform`
